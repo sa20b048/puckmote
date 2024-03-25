@@ -15,7 +15,7 @@ jobs:
       - name: Install and Build 🔧
         uses: actions/setup-node@v4.0.2
         with:
-          node-version: 10.15
+          node-version: 16
       - run: |
           npm ci
           npm run build
