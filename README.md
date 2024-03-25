@@ -1,6 +1,6 @@
 # Puckmote
 
-This fork adds printing out the ```Puck.IR(xxxx)``` command used when sending and IR code. This can be helpful if you want to use the code for integration into another webpage.
+**This fork adds printing out the ```Puck.IR(xxxx)``` command used when sending and IR code. This can be helpful if you want to use the code for integration into another webpage.**
 
 This is a browser-based remote control using a [PuckJS](https://www.puck-js.com/) to send IR codes.
 
