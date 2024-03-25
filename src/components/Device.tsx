@@ -10,6 +10,8 @@ interface Props {
   path: string;
 }
 
+let puckIRStr: string = 'Puck.IR();';
+
 export const Device: FC<Props> = ({ path }) => {
   const fns = useAsync(() => fetchDevice(path), [path]);
   const [fn, setFn] = useState<IFunction>();
@@ -22,6 +24,9 @@ export const Device: FC<Props> = ({ path }) => {
 
   return (
     <>
+      //Output of Puck.IR command
+      <div className="m-2 mt-8 flex justify-between gap-4 flex-col md:flex-row"
+           dangerouslySetInnerHTML={{ __html: `${puckIRStr}` }} />
       <div className="m-2 mt-8 flex justify-between gap-4 flex-col md:flex-row">
         <div>
           <FnVis fn={fn} />
@@ -141,6 +146,7 @@ const decode = async (fn: IFunction) => {
 let last: IFunction = null;
 
 const emit = async (fn: IFunction) => {
+
   if (last === fn) {
     await Puck.write(
       "repeat();\nLED2.set();setTimeout(() => LED2.reset(), 500)\n"
@@ -150,10 +156,16 @@ const emit = async (fn: IFunction) => {
 
     const millis = await decode(fn);
 
+    /* Add debug output, so that Puck.IR command can simply be copied for
+    integration into another tool */
+    let irStr = `[${millis.map((n) => n.toFixed(2)).join(",")}]`;
+    puckIRStr=`Puck.IR(${irStr});\\n`;
+    console.log(puckIRStr);
+
     await Puck.write(`    
         LED3.set();
         function repeat() {
-          Puck.IR([${millis.map((n) => n.toFixed(2)).join(",")}])
+          Puck.IR(${irStr});
         };
         repeat();
         LED3.reset();
