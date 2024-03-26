@@ -1,7 +1,9 @@
 import React, { FC, useEffect, useRef, useState } from "react";
+import { FaRegCopy, FaCheck } from "react-icons/fa";
 
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
+
 
 const Puck = (window as any).Puck;
 Puck.debug = 3;
@@ -10,23 +12,32 @@ interface Props {
   path: string;
 }
 
-let puckIRStr: string = 'Puck.IR();';
-
 export const Device: FC<Props> = ({ path }) => {
   const fns = useAsync(() => fetchDevice(path), [path]);
   const [fn, setFn] = useState<IFunction>();
+  const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
+  const [buttonLabel, setButtonLabel] = useState("Copy code");
 
   const trigger = async (fn: IFunction, send: boolean) => {
     setFn(fn);
 
-    if (send) await emit(fn);
+    if (send) await emit(fn, setPuckIRStr, showCopyFeedback);
+  };
+
+  const showCopyFeedback = () => {
+    setButtonLabel("Copied!");
+    setTimeout(() => {
+      setButtonLabel("Copy code");
+    }, 1500);
+  }
+
+  const handleCopyClick = async () => {
+    await navigator.clipboard.writeText(puckIRStr);
+    showCopyFeedback();
   };
 
   return (
     <>
-      //Output of Puck.IR command
-      <div className="m-2 mt-8 flex justify-between gap-4 flex-col md:flex-row"
-           dangerouslySetInnerHTML={{ __html: `${puckIRStr}` }} />
       <div className="m-2 mt-8 flex justify-between gap-4 flex-col md:flex-row">
         <div>
           <FnVis fn={fn} />
@@ -42,6 +53,32 @@ export const Device: FC<Props> = ({ path }) => {
             ))}
           </nav>
         )}
+        <div className="dark:bg-gray-600 p-2 rounded">
+          <div className="p-1">
+            Copy this text to the "AsTeRICS Grid Puck Action":
+          </div>
+          <div className="dark:bg-gray-900 p-1 flex justify-end">
+            <button
+              onClick={handleCopyClick}
+              className="bg-gray-600 hover:bg-gray-400 rounded p-1 flex items-center text-sm"
+              >
+                {buttonLabel === "Copy code" ? (
+                  <>
+                    <FaRegCopy className="mr-1"/>
+                    {buttonLabel}
+                  </>
+                ) : (
+                  <>
+                    <FaCheck className="mr-1"/>
+                    {buttonLabel}
+                  </>
+                )}
+            </button>
+          </div>
+          <div className="dark:bg-gray-800 p-2 pr-12 break-words word-break[break-all]">
+            {puckIRStr}
+          </div>
+        </div>
       </div>
     </>
   );
@@ -145,8 +182,7 @@ const decode = async (fn: IFunction) => {
 // the last pressed button
 let last: IFunction = null;
 
-const emit = async (fn: IFunction) => {
-
+const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<string>) => void, showCopyFeedback: (value: React.SetStateAction<string>) => void) => {
   if (last === fn) {
     await Puck.write(
       "repeat();\nLED2.set();setTimeout(() => LED2.reset(), 500)\n"
@@ -159,10 +195,12 @@ const emit = async (fn: IFunction) => {
     /* Add debug output, so that Puck.IR command can simply be copied for
     integration into another tool */
     let irStr = `[${millis.map((n) => n.toFixed(2)).join(",")}]`;
-    puckIRStr=`Puck.IR(${irStr});\\n`;
-    console.log(puckIRStr);
+    const newPuckIRStr = `Puck.IR(${irStr});\\n`;
+    setPuckIRStr(newPuckIRStr)
+    navigator.clipboard.writeText(newPuckIRStr);
+    showCopyFeedback();
 
-    await Puck.write(`    
+    await Puck.write(`
         LED3.set();
         function repeat() {
           Puck.IR(${irStr});
