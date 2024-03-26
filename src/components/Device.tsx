@@ -182,7 +182,7 @@ const decode = async (fn: IFunction) => {
 // the last pressed button
 let last: IFunction = null;
 
-const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<string>) => void, showCopyFeedback: (value: React.SetStateAction<string>) => void) => {
+const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<string>) => void, showCopyFeedback: () => void) => {
   if (last === fn) {
     await Puck.write(
       "repeat();\nLED2.set();setTimeout(() => LED2.reset(), 500)\n"
