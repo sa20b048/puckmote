@@ -122,16 +122,23 @@ const Button: FC<ButtonProps> = ({ fn, trigger }) => {
 const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
   const [m, setM] = useState<number[]>([]);
 
-  useEffect(() => {
-    if (fn) decode(fn).then(setM);
-  }, [fn]);
+  let text="–";
 
   let x = 0;
   const scale = 3; //hackkk
 
-  const text = fn
-    ? `${fn.protocol} ${fn.device} ${fn.subdevice} ${fn.function}`
-    : "–";
+  try{
+    useEffect(() => {
+      if (fn) decode(fn).then(setM);
+    }, [fn]);
+
+    text = fn
+      ? `${fn.protocol} ${fn.device} ${fn.subdevice} ${fn.function}`
+      : "–";
+  }catch(err) {
+    text="Problem decoding IR code: "+err;
+    console.error(text);
+  }
 
   return (
     <div className="flex flex-col">
@@ -166,17 +173,22 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
 ///
 
 const decode = async (fn: IFunction) => {
-  const result: string = await EncodeIR(
-    fn.protocol,
-    parseInt(fn.device, 10),
-    parseInt(fn.subdevice, 10),
-    parseInt(fn.function, 10)
-  );
+  try{
+    const result: string = await EncodeIR(
+      fn.protocol,
+      parseInt(fn.device, 10),
+      parseInt(fn.subdevice, 10),
+      parseInt(fn.function, 10)
+    );
 
-  return result
-    .split(" ")
-    .map(parseFloat)
-    .map((v) => v / 1000);
+    return result
+      .split(" ")
+      .map(parseFloat)
+      .map((v) => v / 1000);
+  }catch(err) {
+    console.error("Problem decoding IR code: "+err);
+    throw(err);
+  }
 };
 
 // the last pressed button
@@ -190,23 +202,29 @@ const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<st
   } else {
     last = fn;
 
-    const millis = await decode(fn);
+    try{
 
-    /* Add debug output, so that Puck.IR command can simply be copied for
-    integration into another tool */
-    let irStr = `[${millis.map((n) => n.toFixed(2)).join(",")}]`;
-    const newPuckIRStr = `Puck.IR(${irStr});\\n`;
-    setPuckIRStr(newPuckIRStr)
-    navigator.clipboard.writeText(newPuckIRStr);
-    showCopyFeedback();
+      const millis = await decode(fn);
 
-    await Puck.write(`
-        LED3.set();
-        function repeat() {
-          Puck.IR(${irStr});
-        };
-        repeat();
-        LED3.reset();
-      `);
+      /* Add debug output, so that Puck.IR command can simply be copied for
+      integration into another tool */
+      let irStr = `[${millis.map((n) => n.toFixed(2)).join(",")}]`;
+      const newPuckIRStr = `Puck.IR(${irStr});\\n`;
+      setPuckIRStr(newPuckIRStr)
+      navigator.clipboard.writeText(newPuckIRStr);
+      showCopyFeedback();
+
+      await Puck.write(`
+          LED3.set();
+          function repeat() {
+            Puck.IR(${irStr});
+          };
+          repeat();
+          LED3.reset();
+        `);
+    }catch(err) {
+      setPuckIRStr("Problem decoding IR code: "+err);
+      showCopyFeedback();
+    }
   }
 };
