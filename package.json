@@ -4,7 +4,7 @@
   "description": "A remote control for my TV",
   "scripts": {
     "start": "snowpack dev",
-    "build": "snowpack build && workbox generateSW workbox-config.js"
+    "build": "snowpack build && workbox generateSW workbox-config.js",
     "deploy": "gh-pages -d build"
   },
   "repository": {
