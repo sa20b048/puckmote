@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import IRPulseManager from 'components/IRPulseManager';a
 import { Device } from "./components/Device";
 import { Choose } from "./components/Choose";
 import { Title } from "./components/Title";
