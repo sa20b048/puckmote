@@ -61,4 +61,7 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export const IRPulseManager = () => {
+  // Your component logic here
+  return <div>IR Pulse Manager Component</div>;
+};
