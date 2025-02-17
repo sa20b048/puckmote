@@ -1,4 +1,5 @@
 import React, {useState} from "../_snowpack/pkg/react.js";
+import {IRPulseManager} from "./components/IRPulseManager.js";
 import {Device} from "./components/Device.js";
 import {Choose} from "./components/Choose.js";
 import {Title} from "./components/Title.js";
@@ -13,5 +14,5 @@ export const App = () => {
   })), deviceList.map((path) => /* @__PURE__ */ React.createElement(Device, {
     key: path,
     path
-  })));
+  })), /* @__PURE__ */ React.createElement(IRPulseManager, null), "  ");
 };
