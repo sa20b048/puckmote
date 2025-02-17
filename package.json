@@ -5,6 +5,7 @@
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build && workbox generateSW workbox-config.js"
+    "deploy": "gh-pages -d build"
   },
   "repository": {
     "type": "git",
