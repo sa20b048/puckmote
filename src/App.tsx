@@ -17,6 +17,8 @@ export const App = () => {
       {deviceList.map((path) => (
         <Device key={path} path={path} />
       ))}
+
+      <IRPulseManager />  {/* Using the IRPulseManager here */}
     </div>
   );
 };
