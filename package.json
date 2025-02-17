@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/benfoxall/puckmote/issues"
   },
-  "homepage": "https://github.com/benfoxall/puckmote",
+  "homepage": "https://sa20b048.github.io/puckmote/",
   "devDependencies": {
     "@snowpack/plugin-postcss": "^1.2.2",
     "@snowpack/plugin-react-refresh": "^2.5.0",
