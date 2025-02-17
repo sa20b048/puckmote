@@ -30,7 +30,7 @@
     "@snowpack/plugin-typescript": "^1.2.1",
     "@snowpack/plugin-webpack": "^2.3.1",
     "@types/papaparse": "^5.2.5",
-    "@types/react": "^17.0.4",
+    "@types/react": "^18.2.6",
     "@types/react-dom": "^17.0.3",
     "@types/web-bluetooth": "0.0.9",
     "autoprefixer": "^10.2.5",
