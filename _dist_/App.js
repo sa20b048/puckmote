@@ -1,5 +1,5 @@
 import React, {useState} from "../_snowpack/pkg/react.js";
-import {IRPulseManager} from "./components/IRPulseManager.js";
+import IRPulseManager from "./components/IRPulseManager.js";
 import {Device} from "./components/Device.js";
 import {Choose} from "./components/Choose.js";
 import {Title} from "./components/Title.js";

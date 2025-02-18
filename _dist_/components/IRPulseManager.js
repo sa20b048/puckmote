@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "../../_snowpack/pkg/react.js";
-const App = () => {
+const IRPulseManager = () => {
   const [notes, setNotes] = useState([]);
   const [commands, setCommands] = useState({});
   const [title, setTitle] = useState("");
@@ -58,6 +58,4 @@ const App = () => {
     onClick: () => deleteNote(index)
   }, "Löschen")))));
 };
-export const IRPulseManager = () => {
-  return /* @__PURE__ */ React.createElement("div", null, "IR Pulse Manager Component");
-};
+export default IRPulseManager;
