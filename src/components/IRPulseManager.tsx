@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const App: React.FC = () => {
+const IRPulseManager: React.FC = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [commands, setCommands] = useState<{ [key: string]: string[] }>({});
   const [title, setTitle] = useState("");
@@ -61,7 +61,4 @@ const App: React.FC = () => {
   );
 };
 
-export const IRPulseManager = () => {
-  // Your component logic here
-  return <div>IR Pulse Manager Component</div>;
-};
+export default IRPulseManager;
