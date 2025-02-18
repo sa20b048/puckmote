@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A remote control for my TV",
   "scripts": {
+              "predeploy": "npm run build",   "deploy": "gh-pages -d dist"
     "start": "snowpack dev",
     "build": "snowpack build && workbox generateSW workbox-config.js",
     "deploy": "gh-pages -d build"
