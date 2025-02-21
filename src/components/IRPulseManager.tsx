@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export const IRPulseManager: React.FC = () => {
+const IRPulseManager: React.FC = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [commands, setCommands] = useState<{ [key: string]: string[] }>({});
   const [title, setTitle] = useState("");
