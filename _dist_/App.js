@@ -3,6 +3,7 @@ import IRPulseManager from "./components/IRPulseManager.js";
 import {Device} from "./components/Device.js";
 import {Choose} from "./components/Choose.js";
 import {Title} from "./components/Title.js";
+import BluetoothConnection from "./components/BluetoothConnection.js";
 export const App = () => {
   const [deviceList, setDeviceList] = useState([]);
   return /* @__PURE__ */ React.createElement("div", {
@@ -14,5 +15,5 @@ export const App = () => {
   })), deviceList.map((path) => /* @__PURE__ */ React.createElement(Device, {
     key: path,
     path
-  })), /* @__PURE__ */ React.createElement(IRPulseManager, null), "  ");
+  })), /* @__PURE__ */ React.createElement("div", null), /* @__PURE__ */ React.createElement(BluetoothConnection, null), /* @__PURE__ */ React.createElement(IRPulseManager, null), "  ");
 };

@@ -141,3 +141,31 @@ const emit = async (fn, setPuckIRStr, showCopyFeedback) => {
     }
   }
 };
+const Devicechoice = () => {
+  const [commands, setCommands] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [newCommand, setNewCommand] = useState("");
+  const addCommand = () => {
+    if (newCommand.trim() !== "") {
+      setCommands([...commands, newCommand]);
+      setNewCommand("");
+      setShowPopup(false);
+    }
+  };
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("button", {
+    onClick: () => setShowPopup(true)
+  }, "New Command"), showPopup && /* @__PURE__ */ React.createElement("div", {
+    className: "popup"
+  }, /* @__PURE__ */ React.createElement("input", {
+    type: "text",
+    value: newCommand,
+    onChange: (e) => setNewCommand(e.target.value),
+    placeholder: "Enter command"
+  }), /* @__PURE__ */ React.createElement("button", {
+    onClick: addCommand
+  }, "Add"), /* @__PURE__ */ React.createElement("button", {
+    onClick: () => setShowPopup(false)
+  }, "Cancel")), /* @__PURE__ */ React.createElement("ul", null, commands.map((cmd, index) => /* @__PURE__ */ React.createElement("li", {
+    key: index
+  }, cmd))));
+};
