@@ -74,6 +74,7 @@ export const Device: FC<Props> = ({ path }) => {
                   </>
                 )}
             </button>
+            
           </div>
           <div className="dark:bg-gray-800 p-2 pr-12 break-words word-break[break-all]">
             {puckIRStr}
@@ -228,3 +229,42 @@ const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<st
     }
   }
 };
+const Devicechoice = () =>{
+  const [commands, setCommands] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [newCommand, setNewCommand] = useState("");
+
+  const addCommand = () => {
+    if (newCommand.trim() !== "") {
+      setCommands([...commands, newCommand]);
+      setNewCommand("");
+      setShowPopup(false);
+    }
+};
+return (
+  <div>
+    <button onClick={() => setShowPopup(true)}>New Command</button>
+    
+    {showPopup && (
+      <div className="popup">
+        <input
+          type="text"
+          value={newCommand}
+          onChange={(e) => setNewCommand(e.target.value)}
+          placeholder="Enter command"
+        />
+        <button onClick={addCommand}>Add</button>
+        <button onClick={() => setShowPopup(false)}>Cancel</button>
+      </div>
+    )}
+
+    <ul>
+      {commands.map((cmd, index) => (
+        <li key={index}>{cmd}</li>
+      ))}
+    </ul>
+  </div>
+);
+}
+
+

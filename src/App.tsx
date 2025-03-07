@@ -3,7 +3,7 @@ import  IRPulseManager  from "./components/IRPulseManager";
 import { Device } from "./components/Device";
 import { Choose } from "./components/Choose";
 import { Title } from "./components/Title";
-
+import BluetoothConnection from "./components/BluetoothConnection";
 export const App = () => {
   const [deviceList, setDeviceList] = useState<string[]>([]);
 
@@ -17,7 +17,12 @@ export const App = () => {
       {deviceList.map((path) => (
         <Device key={path} path={path} />
       ))}
-
+     <div>
+     
+    
+    </div>
+    
+     <BluetoothConnection/>
       <IRPulseManager />  {/* Using the IRPulseManager here */}
     </div>
   );
