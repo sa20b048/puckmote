@@ -35,35 +35,27 @@ export const Choose = ({onChoose: setDevices}) => {
     const q = params.toString();
     history.pushState({manufacturer, type}, `${manufacturer} / ${type}`, q.length ? `?${q}` : ".");
   }, [manufacturer, type]);
-  const [dArray, setDArray] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [newDeviceName, setNewDeviceName] = useState("");
-  const [newCommandName, setNewCommandName] = useState("");
   const [isPulseModalOpen, setPulseModalOpen] = useState(false);
+  const [newCommandName, setNewCommandName] = useState("");
   const [pulseTimes, setPulseTimes] = useState();
-  const [addeddeviceList, setaddedDeviceList] = useState([]);
-  const [addedCommandList, setaddedCommandList] = useState([]);
+  const [addedDeviceList, setAddedDeviceList] = useState([]);
+  const [addedCommandList, setAddedCommandList] = useState([]);
   const addNewDevice = () => {
     if (newDeviceName.trim() === "")
       return;
-    setaddedDeviceList([...addeddeviceList, newDeviceName]);
+    setAddedDeviceList([...addedDeviceList, newDeviceName]);
     setModalOpen(false);
     setNewDeviceName("");
   };
   const addNewCommand = () => {
     if (newCommandName.trim() === "" || !pulseTimes)
       return;
-    setaddedCommandList([...addedCommandList, {title: newCommandName, pulseTimes}]);
+    setAddedCommandList([...addedCommandList, {device: newDeviceName, title: newCommandName, pulseTimes}]);
     setPulseModalOpen(false);
     setNewCommandName("");
     setPulseTimes("");
-  };
-  const [isConnected, setIsConnected] = useState(false);
-  const connectToPuck = () => {
-    setIsConnected(true);
-  };
-  const disconnectFromPuck = () => {
-    setIsConnected(false);
   };
   const handleCommandClick = (pulseTimes2) => {
     console.log("Puck IR command triggered with pulse times:", pulseTimes2);
@@ -80,13 +72,7 @@ export const Choose = ({onChoose: setDevices}) => {
     value: manufacturer
   }, /* @__PURE__ */ React.createElement("option", null), Object.keys(manufacturers).map((name) => /* @__PURE__ */ React.createElement("option", {
     key: name
-  }, name)))), /* @__PURE__ */ React.createElement("div", {
-    className: "mt-4 w-full"
-  }, /* @__PURE__ */ React.createElement("label", null, "New Device "), /* @__PURE__ */ React.createElement("button", {
-    type: "button",
-    onClick: () => setModalOpen(true),
-    className: "flex flex-col md:flex-row gap-8 mt-2 p-2 bg-blue-500 text-white rounded"
-  }, "Add New Device")), types && /* @__PURE__ */ React.createElement("label", {
+  }, name)))), types && /* @__PURE__ */ React.createElement("label", {
     className: "block"
   }, /* @__PURE__ */ React.createElement("div", null, "Device Type"), /* @__PURE__ */ React.createElement("select", {
     className: "dark:bg-gray-800 p-2 rounded block",
@@ -95,15 +81,24 @@ export const Choose = ({onChoose: setDevices}) => {
     value: type
   }, /* @__PURE__ */ React.createElement("option", null), Object.keys(types).map((name) => /* @__PURE__ */ React.createElement("option", {
     key: name
-  }, name))))), /* @__PURE__ */ React.createElement("div", {
+  }, name)))), /* @__PURE__ */ React.createElement("div", {
+    className: "mt-4 w-full"
+  }, /* @__PURE__ */ React.createElement("label", null, "New Device "), /* @__PURE__ */ React.createElement("button", {
+    type: "button",
+    onClick: () => setModalOpen(true),
+    className: "flex flex-col md:flex-row gap-8 mt-2 p-2 bg-blue-500 text-white rounded"
+  }, "Add New Device"))), /* @__PURE__ */ React.createElement("div", {
     className: "mt-4 space-y-2 w-full"
-  }, addeddeviceList.map((device, index) => /* @__PURE__ */ React.createElement("div", {
+  }, addedDeviceList.map((device, index) => /* @__PURE__ */ React.createElement("div", {
     key: index,
-    className: "dark:bg-gray-800 bg-white p-2 rounded "
+    className: "dark:bg-gray-800 bg-white p-2 rounded"
   }, /* @__PURE__ */ React.createElement("span", null, device), /* @__PURE__ */ React.createElement("button", {
-    onClick: () => setPulseModalOpen(true),
+    onClick: () => {
+      setNewDeviceName(device);
+      setPulseModalOpen(true);
+    },
     className: "m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
-  }, "New Command"), addedCommandList.filter((command) => command.title === device).map((command, idx) => /* @__PURE__ */ React.createElement("button", {
+  }, "New Command"), addedCommandList.filter((command) => command.device === device).map((command, idx) => /* @__PURE__ */ React.createElement("button", {
     key: idx,
     className: "m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500",
     onClick: () => handleCommandClick(command.pulseTimes)
@@ -133,15 +128,15 @@ export const Choose = ({onChoose: setDevices}) => {
     className: "bg-white dark:bg-gray-900 p-4 rounded shadow-lg w-96"
   }, /* @__PURE__ */ React.createElement("h2", {
     className: "text-lg font-bold mb-4"
-  }, "Pulse Times and Bluetooth"), /* @__PURE__ */ React.createElement("input", {
+  }, "Add New Command"), /* @__PURE__ */ React.createElement("input", {
     type: "text",
-    placeholder: "Enter Command name",
+    placeholder: "Enter command name",
     value: newCommandName,
     onChange: (e) => setNewCommandName(e.target.value),
     className: "w-full p-2 mb-4 border rounded dark:bg-gray-800 dark:text-white"
   }), /* @__PURE__ */ React.createElement("input", {
     type: "text",
-    placeholder: "Enter pulseTimes",
+    placeholder: "Enter pulse times",
     value: pulseTimes,
     onChange: (e) => setPulseTimes(e.target.value),
     className: "w-full p-2 mb-4 border rounded dark:bg-gray-800 dark:text-white"
