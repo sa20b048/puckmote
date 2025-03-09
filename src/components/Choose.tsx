@@ -83,7 +83,7 @@ export const Choose: FC<Props> = ({ onChoose: setDevices }) => {
 
   const handleCommandClick = (pulseTimes: string) => {
     console.log("Puck IR command triggered with pulse times:", pulseTimes);
-    Puck.IR(pulseTimes);
+   
     // Puck.IR(pulseTimes); // Call actual Puck IR command method
   };
 
