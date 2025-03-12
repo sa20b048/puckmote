@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef, useState } from "react";
 
 import {FaRegCopy} from 'react-icons/fa';
-import { FaCheck } from "react-icons/fa";
+import { FaCheck } from 'react-icons/fa';
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
 
