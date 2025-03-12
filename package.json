@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "A remote control for my TV",
   "scripts": {
-    "predeploy": "npm run build",
-     "deploy": "gh-pages -d build",
     "start": "snowpack dev",
     "build": "snowpack build && workbox generateSW workbox-config.js"
   },
@@ -23,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/benfoxall/puckmote/issues"
   },
-  "homepage": "https://github.com/benfoxall/puckmote#readme",
+  "homepage": "https://github.com/sa20b048",
   "devDependencies": {
     "@snowpack/plugin-postcss": "^1.2.2",
     "@snowpack/plugin-react-refresh": "^2.5.0",
