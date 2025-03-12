@@ -1,14 +1,7 @@
 import React, { FC, useEffect, useRef, useState } from "react";
 
-
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
-
-import { FaRegCopy, FaCopy, FaCheck } from "react-icons/fa";
-
-
-const CopyIcon = FaRegCopy as unknown as JSX.Element;
-const CheckIcon = FaCheck as unknown as JSX.Element;
 
 const Puck = (window as any).Puck;
 Puck.debug = 3;
@@ -20,25 +13,11 @@ interface Props {
 export const Device: FC<Props> = ({ path }) => {
   const fns = useAsync(() => fetchDevice(path), [path]);
   const [fn, setFn] = useState<IFunction>();
-  const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
-  const [buttonLabel, setButtonLabel] = useState("Copy code");
 
   const trigger = async (fn: IFunction, send: boolean) => {
     setFn(fn);
 
-    if (send) await emit(fn, setPuckIRStr, showCopyFeedback);
-  };
-
-  const showCopyFeedback = () => {
-    setButtonLabel("Copied!");
-    setTimeout(() => {
-      setButtonLabel("Copy code");
-    }, 1500);
-  }
-
-  const handleCopyClick = async () => {
-    await navigator.clipboard.writeText(puckIRStr);
-    showCopyFeedback();
+    if (send) await emit(fn);
   };
 
   return (
@@ -58,32 +37,6 @@ export const Device: FC<Props> = ({ path }) => {
             ))}
           </nav>
         )}
-        <div className="dark:bg-gray-600 p-2 rounded">
-          <div className="p-1">
-            Copy this text to the "AsTeRICS Grid Puck Action":
-          </div>
-          <div className="dark:bg-gray-900 p-1 flex justify-end">
-            <button
-              onClick={handleCopyClick}
-              className="bg-gray-600 hover:bg-gray-400 rounded p-1 flex items-center text-sm"
-              >
-                {buttonLabel === "Copy code" ? (
-                  <>
-                    <FaCopy className="mr-1"/>
-                    {buttonLabel}
-                  </>
-                ) : (
-                  <>
-                    <FaCheck className="mr-1"/>
-                    {buttonLabel}
-                  </>
-                )}
-            </button>
-          </div>
-          <div className="dark:bg-gray-800 p-2 pr-12 break-words word-break[break-all]">
-            {puckIRStr}
-          </div>
-        </div>
       </div>
     </>
   );
@@ -127,23 +80,16 @@ const Button: FC<ButtonProps> = ({ fn, trigger }) => {
 const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
   const [m, setM] = useState<number[]>([]);
 
-  let text="–";
+  useEffect(() => {
+    if (fn) decode(fn).then(setM);
+  }, [fn]);
 
   let x = 0;
   const scale = 3; //hackkk
 
-  try{
-    useEffect(() => {
-      if (fn) decode(fn).then(setM);
-    }, [fn]);
-
-    text = fn
-      ? `${fn.protocol} ${fn.device} ${fn.subdevice} ${fn.function}`
-      : "–";
-  }catch(err) {
-    text="Problem decoding IR code: "+err;
-    console.error(text);
-  }
+  const text = fn
+    ? `${fn.protocol} ${fn.device} ${fn.subdevice} ${fn.function}`
+    : "–";
 
   return (
     <div className="flex flex-col">
@@ -178,28 +124,23 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
 ///
 
 const decode = async (fn: IFunction) => {
-  try{
-    const result: string = await EncodeIR(
-      fn.protocol,
-      parseInt(fn.device, 10),
-      parseInt(fn.subdevice, 10),
-      parseInt(fn.function, 10)
-    );
+  const result: string = await EncodeIR(
+    fn.protocol,
+    parseInt(fn.device, 10),
+    parseInt(fn.subdevice, 10),
+    parseInt(fn.function, 10)
+  );
 
-    return result
-      .split(" ")
-      .map(parseFloat)
-      .map((v) => v / 1000);
-  }catch(err) {
-    console.error("Problem decoding IR code: "+err);
-    throw(err);
-  }
+  return result
+    .split(" ")
+    .map(parseFloat)
+    .map((v) => v / 1000);
 };
 
 // the last pressed button
 let last: IFunction = null;
 
-const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<string>) => void, showCopyFeedback: () => void) => {
+const emit = async (fn: IFunction) => {
   if (last === fn) {
     await Puck.write(
       "repeat();\nLED2.set();setTimeout(() => LED2.reset(), 500)\n"
@@ -207,29 +148,15 @@ const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<st
   } else {
     last = fn;
 
-    try{
+    const millis = await decode(fn);
 
-      const millis = await decode(fn);
-
-      /* Add debug output, so that Puck.IR command can simply be copied for
-      integration into another tool */
-      let irStr = `[${millis.map((n) => n.toFixed(2)).join(",")}]`;
-      const newPuckIRStr = `Puck.IR(${irStr});\\n`;
-      setPuckIRStr(newPuckIRStr)
-      navigator.clipboard.writeText(newPuckIRStr);
-      showCopyFeedback();
-
-      await Puck.write(`
-          LED3.set();
-          function repeat() {
-            Puck.IR(${irStr});
-          };
-          repeat();
-          LED3.reset();
-        `);
-    }catch(err) {
-      setPuckIRStr("Problem decoding IR code: "+err);
-      showCopyFeedback();
-    }
+    await Puck.write(`    
+        LED3.set();
+        function repeat() {
+          Puck.IR([${millis.map((n) => n.toFixed(2)).join(",")}])
+        };
+        repeat();
+        LED3.reset();
+      `);
   }
 };
