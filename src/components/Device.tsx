@@ -1,10 +1,14 @@
 import React, { FC, useEffect, useRef, useState } from "react";
 
-import {FaRegCopy} from 'react-icons/fa';
-import { FaCheck } from 'react-icons/fa';
+
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
 
+import { FaRegCopy, FaCopy, FaCheck } from "react-icons/fa";
+
+
+const CopyIcon = FaRegCopy as unknown as JSX.Element;
+const CheckIcon = FaCheck as unknown as JSX.Element;
 
 const Puck = (window as any).Puck;
 Puck.debug = 3;
@@ -65,7 +69,7 @@ export const Device: FC<Props> = ({ path }) => {
               >
                 {buttonLabel === "Copy code" ? (
                   <>
-                    <FaRegCopy className="mr-1"/>
+                    <FaCopy className="mr-1"/>
                     {buttonLabel}
                   </>
                 ) : (
