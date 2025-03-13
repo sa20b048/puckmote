@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Device } from "./components/Device";
 import { Choose } from "./components/Choose";
 import { Title } from "./components/Title";
-import BluetoothConnection from "./components/BluetoothConnection";
+
 import { DeviceCommandManager } from "./components/DeviceCommandManager";
 
 
@@ -67,7 +67,7 @@ export const App = () => {
     
       <div>
         <div>==</div>
-        <BluetoothConnection />
+      
 
         {/* Only render DeviceCommandManager if Puck.js is loaded */}
         {isPuckLoaded ? (

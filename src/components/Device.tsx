@@ -3,6 +3,7 @@ import { FaRegCopy, FaCheck } from 'react-icons/fa';
 
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
+import BluetoothConnection from "./BluetoothConnection";
 const Puck = (window as any).Puck;
 Puck.debug = 3;
 
@@ -43,7 +44,7 @@ export const Device: FC<Props> = ({ path }) => {
         <div className="opacity-20">{path}</div>
       </div>
       <div>
-
+      <BluetoothConnection />
       </div>
       <div className="dark:bg-gray-800 bg-white p-2 rounded">
         {fns && (
