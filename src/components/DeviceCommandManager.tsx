@@ -21,7 +21,7 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
   const [rxCharacteristic, setRxCharacteristic] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState("");
-//Puck IR anzeigen wie in Demo und bei meinem zum Kopieren Modal automatisch Command puck IR
+  //Puck IR anzeigen wie in Demo und bei meinem zum Kopieren Modal automatisch Command puck IR
   const connectToPuck = async () => {
     try {
       // Request the device with UART service
@@ -90,18 +90,25 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       console.error("Failed to disconnect from Puck.js:", error);
     }
   };
-
+  //
   const handleNotifications = (event) => {
+    // Decode the received data
     const value = new TextDecoder().decode(event.target.value);
-    console.log("Received data:", value);
+    console.log("Raw received data:", value);  // Log raw data
 
-    // Update state with new data
-    setNotifications((prevNotifications) => prevNotifications + value.trim());
+    // Clean the data by removing unwanted escape sequences like [J and newlines
+    const cleanedValue = value.replace(/\x1B\[J/g, "").replace(/\n/g, "").trim();  // Remove [J and newlines
+    console.log("Cleaned data:", cleanedValue);  // Log cleaned data
 
-    // Pass the received pulse times to the parent component
-    onPulseTimesChange(value.trim());
+    // Update state with cleaned data
+    setNotifications((prevNotifications) => prevNotifications + cleanedValue);
+
+    // Pass the cleaned pulse times to the parent component
+    onPulseTimesChange(cleanedValue);
   };
 
+
+  //
   return (
     <div>
       <button id="connect" onClick={connectToPuck}>

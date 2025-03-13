@@ -3,8 +3,6 @@ import { FaRegCopy, FaCheck } from 'react-icons/fa';
 
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
-
-
 const Puck = (window as any).Puck;
 Puck.debug = 3;
 
@@ -44,7 +42,9 @@ export const Device: FC<Props> = ({ path }) => {
         </div>
         <div className="opacity-20">{path}</div>
       </div>
+      <div>
 
+      </div>
       <div className="dark:bg-gray-800 bg-white p-2 rounded">
         {fns && (
           <nav className="flex flex-wrap">
@@ -61,18 +61,18 @@ export const Device: FC<Props> = ({ path }) => {
             <button
               onClick={handleCopyClick}
               className="bg-gray-600 hover:bg-gray-400 rounded p-1 flex items-center text-sm"
-              >
-                {buttonLabel === "Copy code" ? (
-                  <>
-                    <FaRegCopy className="mr-1"/>
-                    {buttonLabel}
-                  </>
-                ) : (
-                  <>
-                    <FaCheck className="mr-1"/>
-                    {buttonLabel}
-                  </>
-                )}
+            >
+              {buttonLabel === "Copy code" ? (
+                <>
+                  <FaRegCopy className="mr-1" />
+                  {buttonLabel}
+                </>
+              ) : (
+                <>
+                  <FaCheck className="mr-1" />
+                  {buttonLabel}
+                </>
+              )}
             </button>
           </div>
           <div className="dark:bg-gray-800 p-2 pr-12 break-words word-break[break-all]">
@@ -122,12 +122,12 @@ const Button: FC<ButtonProps> = ({ fn, trigger }) => {
 const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
   const [m, setM] = useState<number[]>([]);
 
-  let text="–";
+  let text = "–";
 
   let x = 0;
   const scale = 3; //hackkk
 
-  try{
+  try {
     useEffect(() => {
       if (fn) decode(fn).then(setM);
     }, [fn]);
@@ -135,8 +135,8 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
     text = fn
       ? `${fn.protocol} ${fn.device} ${fn.subdevice} ${fn.function}`
       : "–";
-  }catch(err) {
-    text="Problem decoding IR code: "+err;
+  } catch (err) {
+    text = "Problem decoding IR code: " + err;
     console.error(text);
   }
 
@@ -173,7 +173,7 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
 ///
 
 const decode = async (fn: IFunction) => {
-  try{
+  try {
     const result: string = await EncodeIR(
       fn.protocol,
       parseInt(fn.device, 10),
@@ -185,9 +185,9 @@ const decode = async (fn: IFunction) => {
       .split(" ")
       .map(parseFloat)
       .map((v) => v / 1000);
-  }catch(err) {
-    console.error("Problem decoding IR code: "+err);
-    throw(err);
+  } catch (err) {
+    console.error("Problem decoding IR code: " + err);
+    throw (err);
   }
 };
 
@@ -202,7 +202,7 @@ const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<st
   } else {
     last = fn;
 
-    try{
+    try {
 
       const millis = await decode(fn);
 
@@ -222,8 +222,8 @@ const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<st
           repeat();
           LED3.reset();
         `);
-    }catch(err) {
-      setPuckIRStr("Problem decoding IR code: "+err);
+    } catch (err) {
+      setPuckIRStr("Problem decoding IR code: " + err);
       showCopyFeedback();
     }
   }
