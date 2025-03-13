@@ -64,6 +64,7 @@ export const App = () => {
       {deviceList.map((path) => (
         <Device key={path} path={path} />
       ))}
+    
       <div>
         <div>==</div>
         <BluetoothConnection />

@@ -82,11 +82,22 @@ const BluetoothConnection = () => {
     console.log('Received data:', value);
 
     // Update state with new data
-    setNotifications((prevNotifications) => prevNotifications + value.trim());
+    setNotifications((prevNotifications) => prevNotifications + value.replace(/\x1B\[J/g, "").replace(/\n/g, "").replace(/>/g,"").trim());
    
   };
   return (
-    <p>Add personal devices just scan the IR code</p>
+    <div>
+      <h1>Bluetooth Connection</h1>
+      <p>{isConnected ? 'Connected to Puck.js' : 'Not connected'}</p>
+
+      {/* Connect/Disconnect Buttons */}
+      <button onClick={isConnected ? disconnectFromPuck : connectToPuck}>
+        {isConnected ? 'Disconnect' : 'Connect'}
+      </button>
+
+      <h3>Notifications</h3>
+      <p>{notifications}</p>
+    </div>
   );
   
 };

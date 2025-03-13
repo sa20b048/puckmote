@@ -1,8 +1,9 @@
 import React, { FC, useState } from "react";
-
+import { FaRegCopy, FaCheck } from 'react-icons/fa';
 // Ensure the Puck object is available globally
 const Puck = (window as any).Puck;
 Puck.debug = 3;
+
 
 interface DeviceCommand {
   device: string;
@@ -10,9 +11,11 @@ interface DeviceCommand {
   pulseTimes: string;
 }
 
+
 interface DeviceCommandManagerProps {
   onCommandClick: (pulseTimes: string) => void;
 }
+
 
 const BluetoothConnection = ({ onPulseTimesChange }) => {
   const [puckDevice, setPuckDevice] = useState(null);
@@ -21,7 +24,8 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
   const [rxCharacteristic, setRxCharacteristic] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState("");
-  //Puck IR anzeigen wie in Demo und bei meinem zum Kopieren Modal automatisch Command puck IR
+
+
   const connectToPuck = async () => {
     try {
       // Request the device with UART service
@@ -30,19 +34,24 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
         optionalServices: ["6e400001-b5a3-f393-e0a9-e50e24dcca9e"],
       });
 
+
       console.log("Connecting to GATT server...");
       const server = await device.gatt.connect();
 
+
       console.log("Getting UART service...");
       const service = await server.getPrimaryService("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+
 
       console.log("Getting characteristics...");
       const tx = await service.getCharacteristic("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
       const rx = await service.getCharacteristic("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
+
       // Enable notifications on the RX characteristic
       rx.addEventListener("characteristicvaluechanged", handleNotifications);
       await rx.startNotifications();
+
 
       setPuckDevice(device);
       setGattServer(server);
@@ -50,11 +59,13 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       setRxCharacteristic(rx);
       setIsConnected(true);
 
+
       console.log("Connected to Puck.js");
     } catch (error) {
       console.error("Failed to connect to Puck.js:", error);
     }
   };
+
 
   const disconnectFromPuck = async () => {
     try {
@@ -63,12 +74,14 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
         return;
       }
 
+
       if (rxCharacteristic) {
         console.log("Stopping notifications...");
         await rxCharacteristic.stopNotifications();
         rxCharacteristic.removeEventListener("characteristicvaluechanged", handleNotifications);
         console.log("Notifications stopped.");
       }
+
 
       if (gattServer && gattServer.connected) {
         console.log("Disconnecting from GATT server...");
@@ -78,6 +91,7 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
         console.log("GATT server is not connected.");
       }
 
+
       // Clear references to ensure the device can be reconnected
       setPuckDevice(null);
       setGattServer(null);
@@ -85,30 +99,28 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       setRxCharacteristic(null);
       setIsConnected(false);
 
+
       console.log("Puck.js disconnected and cleaned up.");
     } catch (error) {
       console.error("Failed to disconnect from Puck.js:", error);
     }
   };
-  //
+
+
   const handleNotifications = (event) => {
-    // Decode the received data
     const value = new TextDecoder().decode(event.target.value);
-    console.log("Raw received data:", value);  // Log raw data
+    console.log("Received data:", value);
 
-    // Clean the data by removing unwanted escape sequences like [J and newlines
-    const cleanedValue = value.replace(/\x1B\[J/g, "").replace(/\n/g, "").replace(/>/g,"").trim();  // Remove [J and newlines
-    console.log("Cleaned data:", cleanedValue);  // Log cleaned data
 
-    // Update state with cleaned data
-    setNotifications((prevNotifications) => prevNotifications + cleanedValue);
+    // Update state with new data
+    setNotifications((prevNotifications) => prevNotifications + value.replace(/\x1B\[J/g, "").replace(/\n/g, "").replace(/>/g,"").trim());
 
-    // Pass the cleaned pulse times to the parent component
-    onPulseTimesChange(cleanedValue);
+
+    // Pass the received pulse times to the parent component
+    onPulseTimesChange(value.trim());
   };
 
 
-  //
   return (
     <div>
       <button id="connect" onClick={connectToPuck}>
@@ -117,6 +129,7 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       <button id="disconnect" onClick={disconnectFromPuck}>
         Disconnect from Puck.js
       </button>
+
 
       {/* Display the received data */}
       <div style={{ marginTop: "20px", padding: "10px", background: "#f4f4f4", borderRadius: "5px" }}>
@@ -149,6 +162,8 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
   const [pulseTimes, setPulseTimes] = useState("");
   const [addedDeviceList, setAddedDeviceList] = useState<string[]>([]);
   const [addedCommandList, setAddedCommandList] = useState<DeviceCommand[]>([]);
+  const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
+  const [buttonLabel, setButtonLabel] = useState("Copy code");
 
   const addNewDevice = () => {
     if (newDeviceName.trim() === "") return;
@@ -176,7 +191,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }
 
     try {
-      // Send the pulse times to Puck.js
       await Puck.write(`Puck.IR([${pulseTimes}]);\n`);
       console.log(`Replaying command with pulse times: ${pulseTimes}`);
     } catch (error) {
@@ -184,9 +198,20 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }
   };
 
-  // Lokales Abspeichern von
-  // Geräten und Befehlen in einer JSON-Datei
-  // Laden
+  const showCopyFeedback = () => {
+    setButtonLabel("Copied!");
+    setTimeout(() => {
+      setButtonLabel("Copy code");
+    }, 1500);
+  };
+
+  const handleCopyClick = async (pulseTimes: string) => {
+    const irStr = `Puck.IR([${pulseTimes}]);\n`;
+    setPuckIRStr(irStr);
+    await navigator.clipboard.writeText(irStr);
+    showCopyFeedback();
+  };
+
   const saveStateToJson = () => {
     const state = {
       devices: addedDeviceList,
@@ -202,7 +227,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     URL.revokeObjectURL(url);
   };
 
-  // Laden von Lokalen User
   const loadStateFromJson = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -217,7 +241,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }
   };
 
-  // Löschen
   const clearState = () => {
     setAddedDeviceList([]);
     setAddedCommandList([]);
@@ -278,13 +301,39 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
             {addedCommandList
               .filter((command) => command.device === device)
               .map((command, idx) => (
-                <button
-                  key={idx}
-                  className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
-                  onClick={() => handleCommandClick(command.pulseTimes)}
-                >
-                  {command.title}
-                </button>
+                <div key={idx} className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500">
+                  <button
+                    onClick={() => handleCommandClick(command.pulseTimes)}
+                  >
+                    {command.title}
+                  </button>
+                  <div className="dark:bg-gray-600 p-2 rounded mt-2">
+                    <div className="p-1">
+                      Copy this text to the "AsTeRICS Grid Puck Action":
+                    </div>
+                    <div className="dark:bg-gray-900 p-1 flex justify-end">
+                      <button
+                        onClick={() => handleCopyClick(command.pulseTimes)}
+                        className="bg-gray-600 hover:bg-gray-400 rounded p-1 flex items-center text-sm"
+                      >
+                        {buttonLabel === "Copy code" ? (
+                          <>
+                            <FaRegCopy className="mr-1" />
+                            {buttonLabel}
+                          </>
+                        ) : (
+                          <>
+                            <FaCheck className="mr-1" />
+                            {buttonLabel}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="dark:bg-gray-800 p-2 pr-12 break-words word-break[break-all]">
+                      {`Puck.IR([${command.pulseTimes}]);\n`}
+                    </div>
+                  </div>
+                </div>
               ))}
           </div>
         ))}
