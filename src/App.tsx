@@ -6,6 +6,7 @@ import { Title } from "./components/Title";
 import BluetoothConnection from "./components/BluetoothConnection";
 import { DeviceCommandManager } from "./components/DeviceCommandManager";
 
+
 // Define a type for the Puck object
 interface PuckType {
   write: (command: string) => Promise<void>;

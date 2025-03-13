@@ -97,7 +97,7 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
     console.log("Raw received data:", value);  // Log raw data
 
     // Clean the data by removing unwanted escape sequences like [J and newlines
-    const cleanedValue = value.replace(/\x1B\[J/g, "").replace(/\n/g, "").trim();  // Remove [J and newlines
+    const cleanedValue = value.replace(/\x1B\[J/g, "").replace(/\n/g, "").replace(/>/g,"").trim();  // Remove [J and newlines
     console.log("Cleaned data:", cleanedValue);  // Log cleaned data
 
     // Update state with cleaned data
