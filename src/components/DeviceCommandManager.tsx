@@ -21,7 +21,7 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
   const [rxCharacteristic, setRxCharacteristic] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState("");
-
+//Puck IR anzeigen wie in Demo und bei meinem zum Kopieren Modal automatisch Command puck IR
   const connectToPuck = async () => {
     try {
       // Request the device with UART service
