@@ -169,28 +169,7 @@ const BluetoothConnection = () => {
 //
 //
   return (
-    
     <div>
-      <h1>Bluetooth Connection</h1>
-      <p>{isConnected ? 'Connected to Puck.js' : 'Not connected'}</p>
-      {/* Connect/Disconnect Buttons */}
-      <button onClick={isConnected ? disconnectFromPuck : connectToPuck}>
-        {isConnected ? 'Disconnect' : 'Connect'}
-      </button>
-
-      <h3>Notifications</h3>
-      <div>
-        <button onClick={() => handleCommandClick(notifications)}>Test
-        </button>
-      
-      </div>
-      <div>
-        <button onClick={() => handleCopyPulseClick(notifications)}>Copy IR
-        </button>
-      
-      </div>
-      <p> {notifications}</p>
-
       <div className="dark:bg-gray-900 p-1 flex justify-end">
         <button
           onClick={() => handleCopyClick(notifications)}

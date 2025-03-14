@@ -118,21 +118,21 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
     }, 1500);
   };
 
-    const handleCopyPulseClick = async (pulseTimes: string) => {
-      const irStr = `${notifications}\n`;
-      setPuckIRStr(irStr);
-      await navigator.clipboard.writeText(irStr);
-      showCopyFeedback();
-    };
- 
-    
+  const handleCopyPulseClick = async (pulseTimes: string) => {
+    const irStr = `${notifications}\n`;
+    setPuckIRStr(irStr);
+    await navigator.clipboard.writeText(irStr);
+    showCopyFeedback();
+  };
+
+
 
   return (
     <div>
-      <button id="connect" onClick={connectToPuck}>
+      <button id="connect" onClick={connectToPuck} className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500">
         Connect to Puck.js
       </button>
-      <button id="disconnect" onClick={disconnectFromPuck}>
+      <button id="disconnect" onClick={disconnectFromPuck} className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500">
         Disconnect from Puck.js
       </button>
 
@@ -150,10 +150,10 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
             readOnly // Feld ist schreibgeschützt
             style={{ width: "100%", height: "150px", marginTop: "10px" }}
           />
-                  <button onClick={() => handleCopyPulseClick(notifications)}
-                    className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
-                    >Copy IR to Clipboard
-                  </button>
+          <button onClick={() => handleCopyPulseClick(notifications)}
+            className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
+          >Copy IR to Clipboard
+          </button>
         </div>
       </div>
     </div>
@@ -305,9 +305,9 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
 
   //
   return (
-    
+
     <>
-    
+
       <div className="mt-4 w-full">
         <label>New Device </label>
         <button
@@ -448,9 +448,9 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
               onChange={(e) => setPulseTimes(e.target.value)}
               className="w-full p-2 mb-4 border rounded dark:bg-gray-800 dark:text-white"
             />
-                <button onClick={handleClearClick} className="p-2 bg-red-500 text-white rounded">
-        Clear field
-      </button>
+            <button onClick={handleClearClick} className="p-2 bg-red-500 text-white rounded">
+              Clear field
+            </button>
             {/**/}
             <button></button>
             <BluetoothConnection onPulseTimesChange={handlePulseTimesChange} />

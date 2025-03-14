@@ -1,3 +1,4 @@
+//import ReactHooks import BTConnection and DeviceCommandManagers
 import React, { FC, useEffect, useState } from "react";
 import { FaRegCopy, FaCheck } from 'react-icons/fa';
 import { IFunction, fetchDevice, useAsync } from "../irdb";
@@ -121,15 +122,17 @@ export const Device: FC<Props> = ({ path }) => {
 
   return (
     <>
+          <div>
+        <BluetoothConnection />
+        <DeviceCommandManager onCommandClick={handleCopyClick}/>
+      </div>
       <div className="m-2 mt-8 flex justify-between gap-4 flex-col md:flex-row">
         <div>
           <FnVis fn={fn} />
         </div>
         <div className="opacity-20">{path}</div>
       </div>
-      <div>
-        <BluetoothConnection />
-      </div>
+  
       <div className="dark:bg-gray-800 bg-white p-2 rounded">
         {fns && (
           <nav className="flex flex-wrap">
@@ -153,11 +156,11 @@ export const Device: FC<Props> = ({ path }) => {
             <div className="flex gap-4">
               <button
                 onClick={saveStateToJson}
-                className="p-2 bg-green-500 text-white rounded hover:bg-green-600"
+               className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
               >
                 Save Buttons Locally
               </button>
-              <label className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600 cursor-pointer">
+              <label className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500">
                 Load Buttons to Page
                 <input
                   type="file"
@@ -173,7 +176,7 @@ export const Device: FC<Props> = ({ path }) => {
                 Delete all Buttons
               </button>
             </div>
-            <DeviceCommandManager onCommandClick={handleCopyClick} />
+           
           </nav>
         )}
         <div className="dark:bg-gray-600 p-2 rounded">
