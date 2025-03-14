@@ -27,7 +27,12 @@ npm start
 - https://github.com/probonopd/irdb
 - https://github.com/probonopd/MakeHex
 - https://www.espruino.com/Puck.js+Infrared
+- https://www.espruino.com/ide/
 
 ## Why
 
 My TV remote [ran out of batteries](https://twitter.com/benjaminbenben/status/1328756121897742336).
+
+## Espruino Board Puck.js
+**Detailed steps for uploading the Puck.js script to your Puck device**
+Follow the link to the espruino web based IDE make sure to use Google Chrome, 
