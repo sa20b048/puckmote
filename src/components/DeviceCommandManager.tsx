@@ -1,10 +1,14 @@
+//React Import FC functional components, useState
+//FA icons Copy and Checkmark
 import React, { FC, useState } from "react";
 import { FaRegCopy, FaCheck } from "react-icons/fa";
 
 // Ensure the Puck object is available globally
 const Puck = (window as any).Puck;
 Puck.debug = 3;
-
+//Puck command gets saved to Device with Title and pulseTimes
+//DeviceCommandManagerProps props+callback for command clicks
+//
 interface DeviceCommand {
   device: string;
   title: string;
@@ -26,6 +30,7 @@ const BluetoothConnection: FC<BluetoothConnectionProps> = ({
   pulseTimes,
   setPulseTimes,
 }) => {
+  //State variables
   const [puckDevice, setPuckDevice] = useState<BluetoothDevice | null>(null);
   const [gattServer, setGattServer] = useState<BluetoothRemoteGATTServer | null>(null);
   const [txCharacteristic, setTxCharacteristic] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
@@ -78,7 +83,7 @@ const BluetoothConnection: FC<BluetoothConnectionProps> = ({
     setIsConnected(false);
     console.log("Puck.js disconnected and cleaned up.");
   };
-
+//decodes incoming pulseTime data updates the state and removes unwanted characters from the array
   const handleNotifications = (event: Event) => {
     const value = new TextDecoder().decode((event.target as BluetoothRemoteGATTCharacteristic).value);
     const cleanedValue = value.replace(/\x1B\[J|\n|>/g, "").trim();
@@ -90,7 +95,7 @@ const BluetoothConnection: FC<BluetoothConnectionProps> = ({
     await navigator.clipboard.writeText(notifications);
     setPulseTimes(notifications);
   };
-
+//Rendered UI 
   return (
     <div>
       <button
@@ -127,7 +132,9 @@ const BluetoothConnection: FC<BluetoothConnectionProps> = ({
     </div>
   );
 };
-
+//State variables for Modals AddDevice AddCommand Copy Command SaveState LoadState ClearState
+//+
+//Exports the DeviceCommandManager component to be used in other parts of the application
 export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandClick }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isPulseModalOpen, setPulseModalOpen] = useState(false);
