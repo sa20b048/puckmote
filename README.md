@@ -33,6 +33,6 @@ npm start
 
 My TV remote [ran out of batteries](https://twitter.com/benjaminbenben/status/1328756121897742336).
 
-## Espruino Board Puck.js
-**Detailed steps for uploading the Puck.js script to your Puck device**
-Follow the link to the espruino web based IDE make sure to use Google Chrome, 
+## Getting Started
+Visit https://www.espruino.com/ide/ upload Puck.js to the IDE. Press the Chip Icon where it says RAM which should send the Puck.js file to the Puck then disconnect the Puck and you are set.
+
