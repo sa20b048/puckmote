@@ -14,8 +14,8 @@ interface DeviceCommand {
 interface DeviceCommandManagerProps {
   onCommandClick: (pulseTimes: string) => void;
 }
-
-const BluetoothConnection = ({ onPulseTimesChange }) => {
+// BluetoothConnection component
+const BluetoothConnection = ({ onPulseTimesChange, pulseTimes, setPulseTimes }) => {
   const [puckDevice, setPuckDevice] = useState(null);
   const [gattServer, setGattServer] = useState(null);
   const [txCharacteristic, setTxCharacteristic] = useState(null);
@@ -64,14 +64,12 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
         return;
       }
 
-
       if (rxCharacteristic) {
         console.log("Stopping notifications...");
         await rxCharacteristic.stopNotifications();
         rxCharacteristic.removeEventListener("characteristicvaluechanged", handleNotifications);
         console.log("Notifications stopped.");
       }
-
 
       if (gattServer && gattServer.connected) {
         console.log("Disconnecting from GATT server...");
@@ -80,7 +78,6 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       } else {
         console.log("GATT server is not connected.");
       }
-
 
       // Clear references to ensure the device can be reconnected
       setPuckDevice(null);
@@ -106,9 +103,6 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
     onPulseTimesChange(value.trim());
   };
 
-
-
-
   const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
   const [buttonLabel, setButtonLabel] = useState("Copy code");
   const showCopyFeedback = () => {
@@ -123,9 +117,8 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
     setPuckIRStr(irStr);
     await navigator.clipboard.writeText(irStr);
     showCopyFeedback();
+    setPulseTimes(notifications); // Update the pulseTimes state
   };
-
-
 
   return (
     <div>
@@ -135,9 +128,6 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       <button id="disconnect" onClick={disconnectFromPuck} className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500">
         Disconnect from Puck.js
       </button>
-
-
-
 
       {/* Display the received data */}
       <div style={{ marginTop: "20px", padding: "10px", background: "#f4f4f4", borderRadius: "5px" }}>
@@ -159,13 +149,8 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
     </div>
   );
 };
-// isModalOpen: Steuert die Sichtbarkeit des Modals für neue Geräte.
-// newDeviceName: Speichert den Namen des neuen Geräts.
-// isPulseModalOpen: Steuert die Sichtbarkeit des Modals für neue Befehle.
-// newCommandName: Speichert den Namen des neuen Befehls.
-// pulseTimes: Speichert die Pulslängen für den Befehl.
-// addedDeviceList: Liste der hinzugefügten Geräte.
-// addedCommandList: Liste der hinzugefügten Befehle.
+
+// DeviceCommandManager component
 export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandClick }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [newDeviceName, setNewDeviceName] = useState("");
@@ -189,7 +174,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     setModalOpen(false);
   };
 
-
   const addNewCommand = () => {
     if (newCommandName.trim() === "" || !pulseTimes) return;
     setAddedCommandList([...addedCommandList, { device: newDeviceName, title: newCommandName, pulseTimes }]);
@@ -199,18 +183,15 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     setPulseModalOpen(false);
   };
 
-
   const handlePulseTimesChange = (value) => {
     setPulseTimes(value);
   };
-
 
   const handleCommandClick = async (pulseTimes: string) => {
     if (!pulseTimes) {
       console.error("No pulse times provided.");
       return;
     }
-
 
     try {
       await Puck.write(`Puck.IR([${pulseTimes}]);\n`);
@@ -220,7 +201,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }
   };
 
-
   const showCopyFeedback = () => {
     setButtonLabel("Copied!");
     setTimeout(() => {
@@ -228,14 +208,13 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }, 1500);
   };
 
-  //
-  //
   const handleCopyClick = async (pulseTimes: string) => {
     const irStr = `Puck.IR([${pulseTimes}]);\n`;
     setPuckIRStr(irStr);
     await navigator.clipboard.writeText(irStr);
     showCopyFeedback();
   };
+
   const handleCopyPulseClick = async (pulseTimes: string) => {
     const irStr = `${pulseTimes}\n`;
     setPuckIRStr(irStr);
@@ -257,7 +236,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     a.click();
     URL.revokeObjectURL(url);
   };
-
 
   const loadStateFromJson = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -293,21 +271,13 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }
   };
 
-
   const clearState = () => {
     setAddedDeviceList([]);
     setAddedCommandList([]);
   };
 
-  //
-
-
-
-  //
   return (
-
     <>
-
       <div className="mt-4 w-full">
         <label>New Device </label>
         <button
@@ -318,7 +288,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
           Add New Device
         </button>
       </div>
-
 
       <div className="mt-8 flex gap-4">
         <button
@@ -344,12 +313,10 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
         </button>
       </div>
 
-
       <div className="mt-8 space-y-4">
         {addedDeviceList.map((device, index) => (
           <div key={index} className="dark:bg-gray-800 bg-white p-4 rounded">
             <span className="text-lg font-bold">{device}</span>
-
 
             <button
               onClick={() => {
@@ -360,7 +327,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
             >
               New Command
             </button>
-
 
             {addedCommandList
               .filter((command) => command.device === device)
@@ -403,7 +369,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
         ))}
       </div>
 
-
       {/* Modal for adding a new device */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -428,7 +393,6 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
         </div>
       )}
 
-
       {/* Modal for adding a new command */}
       {isPulseModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -451,9 +415,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
             <button onClick={handleClearClick} className="p-2 bg-red-500 text-white rounded">
               Clear field
             </button>
-            {/**/}
-            <button></button>
-            <BluetoothConnection onPulseTimesChange={handlePulseTimesChange} />
+            <BluetoothConnection onPulseTimesChange={handlePulseTimesChange} pulseTimes={pulseTimes} setPulseTimes={setPulseTimes} />
             <div className="flex justify-end gap-2">
               <button onClick={() => setPulseModalOpen(false)} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                 Cancel
@@ -469,4 +431,3 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
   );
 };
 export default DeviceCommandManager;
-

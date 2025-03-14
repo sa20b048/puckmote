@@ -170,6 +170,7 @@ const BluetoothConnection = () => {
 //
   return (
     <div>
+
       <div className="dark:bg-gray-900 p-1 flex justify-end">
         <button
           onClick={() => handleCopyClick(notifications)}

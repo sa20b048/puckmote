@@ -1,4 +1,4 @@
-//import ReactHooks import BTConnection and DeviceCommandManagers
+//import ReactHooks import BTConnection
 import React, { FC, useEffect, useState } from "react";
 import { FaRegCopy, FaCheck } from 'react-icons/fa';
 import { IFunction, fetchDevice, useAsync } from "../irdb";
@@ -87,16 +87,16 @@ export const Device: FC<Props> = ({ path }) => {
       reader.onload = (e) => {
         const content = e.target?.result as string;
         const state = JSON.parse(content);
-
-        // Merge devices: Add only new devices that don't already exist
+  
+        // Merge devices
         setAddedDeviceList((prevDevices) => {
           const newDevices = (state.devices || []).filter(
             (device: string) => !prevDevices.includes(device)
           );
           return [...prevDevices, ...newDevices];
         });
-
-        // Merge commands: Add only new commands that don't already exist
+  
+        // Merge commands
         setAddedCommandList((prevCommands) => {
           const newCommands = (state.commands || []).filter(
             (command: DeviceCommand) =>
@@ -109,6 +109,24 @@ export const Device: FC<Props> = ({ path }) => {
           );
           return [...prevCommands, ...newCommands];
         });
+  
+        // Merge generatedButtons
+        if (state.generatedButtons) {
+          setGeneratedButtons((prevButtons) => {
+            const newButtons = state.generatedButtons.filter(
+              (newButton: IFunction) =>
+                !prevButtons.some(
+                  (prevButton) =>
+                    prevButton.functionname === newButton.functionname &&
+                    prevButton.protocol === newButton.protocol &&
+                    prevButton.device === newButton.device &&
+                    prevButton.subdevice === newButton.subdevice &&
+                    prevButton.function === newButton.function
+                )
+            );
+            return [...prevButtons, ...newButtons];
+          });
+        }
       };
       reader.readAsText(file);
     }
