@@ -155,19 +155,6 @@ const BluetoothConnection = () => {
 
   //Modal for BT Connection
   const [isModalOpen, setModalOpen] = useState(false);
-  
-  //
-  //
-
-
-
-  //
-  //
-  //
-
-// return 
-//
-//
   return (
     <div>
 
