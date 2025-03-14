@@ -126,6 +126,13 @@ const BluetoothConnection = () => {
     await navigator.clipboard.writeText(irStr);
     showCopyFeedback();
   };
+  //copies the pulseTimes without writing PuckIR to the clipboard for later use
+  const handleCopyPulseClick = async (pulseTimes: string) => {
+    const irStr = `${pulseTimes}\n`;
+    setPuckIRStr(irStr);
+    await navigator.clipboard.writeText(irStr);
+    showCopyFeedback();
+  };
   //
   const handleCommandClick = async (pulseTimes: string) => {
     if (!pulseTimes) {
@@ -175,6 +182,12 @@ const BluetoothConnection = () => {
       <div>
         <button onClick={() => handleCommandClick(notifications)}>Test
         </button>
+      
+      </div>
+      <div>
+        <button onClick={() => handleCopyPulseClick(notifications)}>Copy IR
+        </button>
+      
       </div>
       <p> {notifications}</p>
 

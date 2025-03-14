@@ -1,12 +1,8 @@
-
 //Import useState and FC Hook
 import React, { FC, useState } from "react";
 //Import ReactIcons
 import { FaRegCopy, FaCheck } from 'react-icons/fa';
-//Import 
-
 // Ensure the Puck object is available globally
-
 const Puck = (window as any).Puck;
 Puck.debug = 3;
 
@@ -113,6 +109,24 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
 
 
 
+  const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
+  const [buttonLabel, setButtonLabel] = useState("Copy code");
+  const showCopyFeedback = () => {
+    setButtonLabel("Copied!");
+    setTimeout(() => {
+      setButtonLabel("Copy code");
+    }, 1500);
+  };
+
+    const handleCopyPulseClick = async (pulseTimes: string) => {
+      const irStr = `${notifications}\n`;
+      setPuckIRStr(irStr);
+      await navigator.clipboard.writeText(irStr);
+      showCopyFeedback();
+    };
+ 
+    
+
   return (
     <div>
       <button id="connect" onClick={connectToPuck}>
@@ -136,6 +150,10 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
             readOnly // Feld ist schreibgeschützt
             style={{ width: "100%", height: "150px", marginTop: "10px" }}
           />
+                  <button onClick={() => handleCopyPulseClick(notifications)}
+                    className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
+                    >Copy IR to Clipboard
+                  </button>
         </div>
       </div>
     </div>
@@ -159,6 +177,9 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
   const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
   const [buttonLabel, setButtonLabel] = useState("Copy code");
 
+  const handleClearClick = () => {
+    setPulseTimes("");
+  };
 
   const addNewDevice = () => {
     if (newDeviceName.trim() === "") return;
@@ -215,7 +236,12 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     await navigator.clipboard.writeText(irStr);
     showCopyFeedback();
   };
-
+  const handleCopyPulseClick = async (pulseTimes: string) => {
+    const irStr = `${pulseTimes}\n`;
+    setPuckIRStr(irStr);
+    await navigator.clipboard.writeText(irStr);
+    showCopyFeedback();
+  };
 
   const saveStateToJson = () => {
     const state = {
@@ -279,7 +305,9 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
 
   //
   return (
+    
     <>
+    
       <div className="mt-4 w-full">
         <label>New Device </label>
         <button
@@ -415,11 +443,16 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
             />
             <input
               type="text"
-              placeholder="Enter pulse times"
+              placeholder=""
               value={pulseTimes}
               onChange={(e) => setPulseTimes(e.target.value)}
               className="w-full p-2 mb-4 border rounded dark:bg-gray-800 dark:text-white"
             />
+                <button onClick={handleClearClick} className="p-2 bg-red-500 text-white rounded">
+        Clear field
+      </button>
+            {/**/}
+            <button></button>
             <BluetoothConnection onPulseTimesChange={handlePulseTimesChange} />
             <div className="flex justify-end gap-2">
               <button onClick={() => setPulseModalOpen(false)} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">
