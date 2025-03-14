@@ -128,7 +128,6 @@ const BluetoothConnection: FC<BluetoothConnectionProps> = ({
   );
 };
 
-// Export the DeviceCommandManager component explicitly
 export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandClick }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isPulseModalOpen, setPulseModalOpen] = useState(false);
@@ -333,5 +332,5 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
   );
 };
 
-// Export the component as the default export
+
 export default DeviceCommandManager;
