@@ -1,21 +1,23 @@
+
+//Import useState and FC Hook
 import React, { FC, useState } from "react";
+//Import ReactIcons
 import { FaRegCopy, FaCheck } from 'react-icons/fa';
+//Import 
+
 // Ensure the Puck object is available globally
+
 const Puck = (window as any).Puck;
 Puck.debug = 3;
-
 
 interface DeviceCommand {
   device: string;
   title: string;
   pulseTimes: string;
 }
-
-
 interface DeviceCommandManagerProps {
   onCommandClick: (pulseTimes: string) => void;
 }
-
 
 const BluetoothConnection = ({ onPulseTimesChange }) => {
   const [puckDevice, setPuckDevice] = useState(null);
@@ -25,7 +27,6 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState("");
 
-
   const connectToPuck = async () => {
     try {
       // Request the device with UART service
@@ -34,24 +35,19 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
         optionalServices: ["6e400001-b5a3-f393-e0a9-e50e24dcca9e"],
       });
 
-
       console.log("Connecting to GATT server...");
       const server = await device.gatt.connect();
 
-
       console.log("Getting UART service...");
       const service = await server.getPrimaryService("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-
 
       console.log("Getting characteristics...");
       const tx = await service.getCharacteristic("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
       const rx = await service.getCharacteristic("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
-
       // Enable notifications on the RX characteristic
       rx.addEventListener("characteristicvaluechanged", handleNotifications);
       await rx.startNotifications();
-
 
       setPuckDevice(device);
       setGattServer(server);
@@ -59,13 +55,11 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       setRxCharacteristic(rx);
       setIsConnected(true);
 
-
       console.log("Connected to Puck.js");
     } catch (error) {
       console.error("Failed to connect to Puck.js:", error);
     }
   };
-
 
   const disconnectFromPuck = async () => {
     try {
@@ -99,26 +93,24 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       setRxCharacteristic(null);
       setIsConnected(false);
 
-
       console.log("Puck.js disconnected and cleaned up.");
     } catch (error) {
       console.error("Failed to disconnect from Puck.js:", error);
     }
   };
 
-
   const handleNotifications = (event) => {
     const value = new TextDecoder().decode(event.target.value);
     console.log("Received data:", value);
 
-
     // Update state with new data
-    setNotifications((prevNotifications) => prevNotifications + value.replace(/\x1B\[J/g, "").replace(/\n/g, "").replace(/>/g,"").trim());
-
+    setNotifications((prevNotifications) => prevNotifications + value.replace(/\x1B\[J/g, "").replace(/\n/g, "").replace(/>/g, "").trim());
 
     // Pass the received pulse times to the parent component
     onPulseTimesChange(value.trim());
   };
+
+
 
 
   return (
@@ -129,6 +121,8 @@ const BluetoothConnection = ({ onPulseTimesChange }) => {
       <button id="disconnect" onClick={disconnectFromPuck}>
         Disconnect from Puck.js
       </button>
+
+
 
 
       {/* Display the received data */}
@@ -165,30 +159,37 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
   const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
   const [buttonLabel, setButtonLabel] = useState("Copy code");
 
+
   const addNewDevice = () => {
     if (newDeviceName.trim() === "") return;
     setAddedDeviceList([...addedDeviceList, newDeviceName]);
-    setModalOpen(false);
+    //Modal closes after the input field has been cleared
     setNewDeviceName("");
+    setModalOpen(false);
   };
+
 
   const addNewCommand = () => {
     if (newCommandName.trim() === "" || !pulseTimes) return;
     setAddedCommandList([...addedCommandList, { device: newDeviceName, title: newCommandName, pulseTimes }]);
-    setPulseModalOpen(false);
+    //order of Modal and Deleting the input field
     setNewCommandName("");
     setPulseTimes("");
+    setPulseModalOpen(false);
   };
+
 
   const handlePulseTimesChange = (value) => {
     setPulseTimes(value);
   };
+
 
   const handleCommandClick = async (pulseTimes: string) => {
     if (!pulseTimes) {
       console.error("No pulse times provided.");
       return;
     }
+
 
     try {
       await Puck.write(`Puck.IR([${pulseTimes}]);\n`);
@@ -198,6 +199,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }
   };
 
+
   const showCopyFeedback = () => {
     setButtonLabel("Copied!");
     setTimeout(() => {
@@ -205,12 +207,15 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     }, 1500);
   };
 
+  //
+  //
   const handleCopyClick = async (pulseTimes: string) => {
     const irStr = `Puck.IR([${pulseTimes}]);\n`;
     setPuckIRStr(irStr);
     await navigator.clipboard.writeText(irStr);
     showCopyFeedback();
   };
+
 
   const saveStateToJson = () => {
     const state = {
@@ -227,6 +232,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
     URL.revokeObjectURL(url);
   };
 
+
   const loadStateFromJson = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -234,18 +240,44 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
       reader.onload = (e) => {
         const content = e.target?.result as string;
         const state = JSON.parse(content);
-        setAddedDeviceList(state.devices || []);
-        setAddedCommandList(state.commands || []);
+
+        // Merge devices: Add only new devices that don't already exist
+        setAddedDeviceList((prevDevices) => {
+          const newDevices = (state.devices || []).filter(
+            (device: string) => !prevDevices.includes(device)
+          );
+          return [...prevDevices, ...newDevices];
+        });
+
+        // Merge commands: Add only new commands that don't already exist
+        setAddedCommandList((prevCommands) => {
+          const newCommands = (state.commands || []).filter(
+            (command: DeviceCommand) =>
+              !prevCommands.some(
+                (prevCommand) =>
+                  prevCommand.device === command.device &&
+                  prevCommand.title === command.title &&
+                  prevCommand.pulseTimes === command.pulseTimes
+              )
+          );
+          return [...prevCommands, ...newCommands];
+        });
       };
       reader.readAsText(file);
     }
   };
+
 
   const clearState = () => {
     setAddedDeviceList([]);
     setAddedCommandList([]);
   };
 
+  //
+
+
+
+  //
   return (
     <>
       <div className="mt-4 w-full">
@@ -258,6 +290,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
           Add New Device
         </button>
       </div>
+
 
       <div className="mt-8 flex gap-4">
         <button
@@ -283,10 +316,12 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
         </button>
       </div>
 
+
       <div className="mt-8 space-y-4">
         {addedDeviceList.map((device, index) => (
           <div key={index} className="dark:bg-gray-800 bg-white p-4 rounded">
             <span className="text-lg font-bold">{device}</span>
+
 
             <button
               onClick={() => {
@@ -297,6 +332,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
             >
               New Command
             </button>
+
 
             {addedCommandList
               .filter((command) => command.device === device)
@@ -339,6 +375,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
         ))}
       </div>
 
+
       {/* Modal for adding a new device */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -362,6 +399,7 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
           </div>
         </div>
       )}
+
 
       {/* Modal for adding a new command */}
       {isPulseModalOpen && (
@@ -398,3 +436,4 @@ export const DeviceCommandManager: FC<DeviceCommandManagerProps> = ({ onCommandC
   );
 };
 export default DeviceCommandManager;
+

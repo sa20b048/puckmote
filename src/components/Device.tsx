@@ -1,9 +1,10 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { FaRegCopy, FaCheck } from 'react-icons/fa';
-
 import { IFunction, fetchDevice, useAsync } from "../irdb";
 import { EncodeIR } from "../wasm/EncodeIR";
 import BluetoothConnection from "./BluetoothConnection";
+import DeviceCommandManager from "./DeviceCommandManager";
+
 const Puck = (window as any).Puck;
 Puck.debug = 3;
 
@@ -11,15 +12,30 @@ interface Props {
   path: string;
 }
 
+interface DeviceCommand {
+  device: string;
+  title: string;
+  pulseTimes: string;
+}
+
 export const Device: FC<Props> = ({ path }) => {
   const fns = useAsync(() => fetchDevice(path), [path]);
   const [fn, setFn] = useState<IFunction>();
   const [puckIRStr, setPuckIRStr] = useState('Puck.IR();');
   const [buttonLabel, setButtonLabel] = useState("Copy code");
+  const [addedDeviceList, setAddedDeviceList] = useState<string[]>([]);
+  const [addedCommandList, setAddedCommandList] = useState<DeviceCommand[]>([]);
+  const [generatedButtons, setGeneratedButtons] = useState<IFunction[]>([]); // Track generated buttons
+
+  // Update generatedButtons when fns changes
+  useEffect(() => {
+    if (fns) {
+      setGeneratedButtons(fns);
+    }
+  }, [fns]);
 
   const trigger = async (fn: IFunction, send: boolean) => {
     setFn(fn);
-
     if (send) await emit(fn, setPuckIRStr, showCopyFeedback);
   };
 
@@ -28,11 +44,79 @@ export const Device: FC<Props> = ({ path }) => {
     setTimeout(() => {
       setButtonLabel("Copy code");
     }, 1500);
-  }
+  };
 
   const handleCopyClick = async () => {
     await navigator.clipboard.writeText(puckIRStr);
     showCopyFeedback();
+  };
+
+  const saveStateToJson = () => {
+    const state = {
+      devices: addedDeviceList,
+      commands: addedCommandList,
+      generatedButtons: generatedButtons, // Save generated buttons
+    };
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "device_commands_state.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  const handleCommandClick = async (pulseTimes: string) => {
+    if (!pulseTimes) {
+      console.error("No pulse times provided.");
+      return;
+    }
+
+    try {
+      await Puck.write(`Puck.IR([${pulseTimes}]);\n`);
+      console.log(`Replaying command with pulse times: ${pulseTimes}`);
+    } catch (error) {
+      console.error("Failed to send IR command:", error);
+    }
+  };
+  const loadStateFromJson = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const state = JSON.parse(content);
+
+        // Merge devices: Add only new devices that don't already exist
+        setAddedDeviceList((prevDevices) => {
+          const newDevices = (state.devices || []).filter(
+            (device: string) => !prevDevices.includes(device)
+          );
+          return [...prevDevices, ...newDevices];
+        });
+
+        // Merge commands: Add only new commands that don't already exist
+        setAddedCommandList((prevCommands) => {
+          const newCommands = (state.commands || []).filter(
+            (command: DeviceCommand) =>
+              !prevCommands.some(
+                (prevCommand) =>
+                  prevCommand.device === command.device &&
+                  prevCommand.title === command.title &&
+                  prevCommand.pulseTimes === command.pulseTimes
+              )
+          );
+          return [...prevCommands, ...newCommands];
+        });
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const clearState = () => {
+    setAddedDeviceList([]);
+    setAddedCommandList([]);
+    setGeneratedButtons([]); // Clear generated buttons
   };
 
   return (
@@ -44,14 +128,52 @@ export const Device: FC<Props> = ({ path }) => {
         <div className="opacity-20">{path}</div>
       </div>
       <div>
-      <BluetoothConnection />
+        <BluetoothConnection />
       </div>
       <div className="dark:bg-gray-800 bg-white p-2 rounded">
         {fns && (
           <nav className="flex flex-wrap">
-            {fns.map((fn, i) => (
+            {/* Render dynamically generated buttons */}
+            {generatedButtons.map((fn, i) => (
               <Button key={i} fn={fn} trigger={trigger} />
             ))}
+
+            {/* Render manually added buttons */}
+            {addedCommandList.map((command, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleCommandClick(command.pulseTimes)}
+                className="m-2 p-2 text-white rounded shadow transition-colors bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500"
+              >
+                {command.title}
+              </button>
+            ))}
+
+            {/* Save, Load, and Clear buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={saveStateToJson}
+                className="p-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Save Buttons Locally
+              </button>
+              <label className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600 cursor-pointer">
+                Load Buttons to Page
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={loadStateFromJson}
+                  className="hidden"
+                />
+              </label>
+              <button
+                onClick={clearState}
+                className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Delete all Buttons
+              </button>
+            </div>
+            <DeviceCommandManager onCommandClick={handleCopyClick} />
           </nav>
         )}
         <div className="dark:bg-gray-600 p-2 rounded">
@@ -95,9 +217,7 @@ const Button: FC<ButtonProps> = ({ fn, trigger }) => {
 
   const click = async () => {
     setActive(true);
-
     await trigger(fn, true);
-
     setActive(false);
   };
 
@@ -109,7 +229,7 @@ const Button: FC<ButtonProps> = ({ fn, trigger }) => {
         "m-2 p-2 text-white rounded shadow transition-colors " +
         (active
           ? "bg-blue-500"
-          : "bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500 focus:text-pink-500")
+          : "bg-gray-900 hover:bg-black focus:bg-black focus:text-pink-500 hover:text-pink-500")
       }
       type="button"
       onClick={click}
@@ -124,9 +244,8 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
   const [m, setM] = useState<number[]>([]);
 
   let text = "–";
-
   let x = 0;
-  const scale = 3; //hackkk
+  const scale = 3;
 
   try {
     useEffect(() => {
@@ -151,11 +270,8 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
       >
         {m.map((val, i) => {
           const p = x;
-
           x += val;
-
           if (i % 2) return null;
-
           return (
             <rect
               key={i}
@@ -171,8 +287,6 @@ const FnVis: FC<{ fn?: IFunction }> = ({ fn }) => {
   );
 };
 
-///
-
 const decode = async (fn: IFunction) => {
   try {
     const result: string = await EncodeIR(
@@ -181,51 +295,49 @@ const decode = async (fn: IFunction) => {
       parseInt(fn.subdevice, 10),
       parseInt(fn.function, 10)
     );
-
     return result
       .split(" ")
       .map(parseFloat)
       .map((v) => v / 1000);
   } catch (err) {
     console.error("Problem decoding IR code: " + err);
-    throw (err);
+    throw err;
   }
 };
 
-// the last pressed button
-let last: IFunction = null;
-
-const emit = async (fn: IFunction, setPuckIRStr: (value: React.SetStateAction<string>) => void, showCopyFeedback: () => void) => {
+const emit = async (
+  fn: IFunction,
+  setPuckIRStr: (value: React.SetStateAction<string>) => void,
+  showCopyFeedback: () => void
+) => {
   if (last === fn) {
     await Puck.write(
       "repeat();\nLED2.set();setTimeout(() => LED2.reset(), 500)\n"
     );
   } else {
     last = fn;
-
     try {
-
       const millis = await decode(fn);
-
-      /* Add debug output, so that Puck.IR command can simply be copied for
-      integration into another tool */
       let irStr = `[${millis.map((n) => n.toFixed(2)).join(",")}]`;
       const newPuckIRStr = `Puck.IR(${irStr});\\n`;
-      setPuckIRStr(newPuckIRStr)
+      setPuckIRStr(newPuckIRStr);
       navigator.clipboard.writeText(newPuckIRStr);
       showCopyFeedback();
-
       await Puck.write(`
-          LED3.set();
-          function repeat() {
-            Puck.IR(${irStr});
-          };
-          repeat();
-          LED3.reset();
-        `);
+        LED3.set();
+        function repeat() {
+          Puck.IR(${irStr});
+        };
+        repeat();
+        LED3.reset();
+      `);
     } catch (err) {
       setPuckIRStr("Problem decoding IR code: " + err);
       showCopyFeedback();
     }
   }
 };
+
+let last: IFunction = null;
+
+export default Device;

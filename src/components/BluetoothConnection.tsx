@@ -133,25 +133,36 @@ const BluetoothConnection = () => {
       return;
     }
     try {
-      await Puck.write(`Puck.IR([${pulseTimes}]);\n`);
+      await Puck.write(`
+        LED3.set();
+        Puck.IR([${pulseTimes}]);\n
+        repeat();
+         LED3.reset();
+        `);
+       
       console.log(`Replaying command with pulse times: ${pulseTimes}`);
     } catch (error) {
       console.error("Failed to send IR command:", error);
     }
   };
 
+  //Modal for BT Connection
+  const [isModalOpen, setModalOpen] = useState(false);
+  
+  //
+  //
+
+
+
   //
   //
   //
 
-
-
-  //
-  //
-  //
-
-// return component
+// return 
+//
+//
   return (
+    
     <div>
       <h1>Bluetooth Connection</h1>
       <p>{isConnected ? 'Connected to Puck.js' : 'Not connected'}</p>
@@ -186,6 +197,7 @@ const BluetoothConnection = () => {
         </button>
       </div>
     </div>
+    
   );
 
 };

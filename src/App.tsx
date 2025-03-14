@@ -5,7 +5,8 @@ import { Choose } from "./components/Choose";
 import { Title } from "./components/Title";
 
 import { DeviceCommandManager } from "./components/DeviceCommandManager";
-
+const Puck = (window as any).Puck;
+Puck.debug = 3;
 
 // Define a type for the Puck object
 interface PuckType {
