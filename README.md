@@ -1,4 +1,4 @@
-# Puckmote
+# Puckmote repository testing 123
 
 **This fork adds printing out the ```Puck.IR(xxxx)``` command used when sending and IR code. This can be helpful if you want to use the code for integration into another webpage. For example you can use as [IR-remote UART-action](https://www.asterics.eu/manuals/asterics-grid/514_uart-action-tutorials.html#remote-control-infrared) in AsTeRICS Grid, the Open Source AAC web application.**
 
